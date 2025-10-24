@@ -1,25 +1,24 @@
-// src/components/QuestionList.js
-import React from "react";
-import QuestionItem from "./QuestionItem";
+function QuestionList({ questions, onDelete }) {
+  function handleDelete(id) {
+    fetch(`http://localhost:4000/questions/${id}`, {
+      method: "DELETE",
+    }).then(() => {
+      onDelete(id);
+    });
+  }
 
-function QuestionList({ questions, onDeleteQuestion, onUpdateQuestion }) {
   return (
-    <div>
-      {questions.length === 0 ? (
-        <p>No questions yet.</p>
-      ) : (
-        <ul>
-          {questions.map((q) => (
-            <QuestionItem
-              key={q.id}
-              question={q}
-              onDeleteQuestion={onDeleteQuestion}
-              onUpdateQuestion={onUpdateQuestion}
-            />
-          ))}
-        </ul>
-      )}
-    </div>
+    <section>
+      <h2>Questions</h2>
+      <ul>
+        {questions.map((q) => (
+          <li key={q.id}>
+            <h4>{q.prompt}</h4>
+            <button onClick={() => handleDelete(q.id)}>Delete Question</button>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

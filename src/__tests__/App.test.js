@@ -40,14 +40,13 @@ test("creates a new question when the form is submitted", async () => {
   fireEvent.change(screen.getByLabelText("Answer 4:"), {
     target: { value: "four" },
   });
-  fireEvent.change(screen.getByLabelText(/Correct Index/i), {
+  fireEvent.change(screen.getByLabelText(/Correct Answer/i), {
     target: { value: "2" },
   });
 
   fireEvent.click(screen.getByText("Add Question"));
   fireEvent.click(screen.getByText("View Questions"));
 
-  // Use findAllByText since there may be duplicates
   const matches = await screen.findAllByText(/lorem testum 1/i);
   expect(matches.length).toBeGreaterThanOrEqual(1);
 });
@@ -56,10 +55,8 @@ test("deletes the question when the delete button is clicked", async () => {
   const { container } = render(<App />);
   fireEvent.click(screen.getByText("View Questions"));
 
-  // Wait for multiple matches to appear
   await screen.findAllByText(/lorem testum 1/i);
 
-  // Find the matching list item that contains the specific text
   const questionItem = Array.from(container.querySelectorAll("li")).find((li) =>
     li.textContent.includes("lorem testum 1")
   );
@@ -71,9 +68,8 @@ test("deletes the question when the delete button is clicked", async () => {
   });
   fireEvent.click(deleteButton);
 
-  // Wait for it to be removed
   await waitFor(() => {
     const allMatches = screen.queryAllByText(/lorem testum 1/i);
-    expect(allMatches.length).toBeLessThan(2); // or 0 depending on your initial state
+    expect(allMatches.length).toBeLessThan(2);
   });
 });

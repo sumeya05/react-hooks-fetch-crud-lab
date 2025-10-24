@@ -1,70 +1,82 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 function NewQuestionForm({ onAddQuestion }) {
-  const [prompt, setPrompt] = useState("");
-  const [answers, setAnswers] = useState(["", "", "", ""]);
-  const [correctIndex, setCorrectIndex] = useState(0);
+  const [formData, setFormData] = useState({
+    prompt: "",
+    answers: ["", "", "", ""],
+    correctIndex: 0,
+  });
+
+  function handleChange(e) {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  }
+
+  function handleAnswerChange(index, value) {
+    const newAnswers = [...formData.answers];
+    newAnswers[index] = value;
+    setFormData({ ...formData, answers: newAnswers });
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
-    const questionObj = {
-      prompt,
-      answers,
-      correctIndex: parseInt(correctIndex, 10),
-    };
-    onAddQuestion(questionObj);
-    // Reset form
-    setPrompt("");
-    setAnswers(["", "", "", ""]);
-    setCorrectIndex(0);
-  }
 
-  function handleAnswerChange(idx, value) {
-    const newAnswers = [...answers];
-    newAnswers[idx] = value;
-    setAnswers(newAnswers);
+    fetch("http://localhost:4000/questions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    })
+      .then((r) => r.json())
+      .then((newQuestion) => {
+        onAddQuestion(newQuestion);
+        setFormData({
+          prompt: "",
+          answers: ["", "", "", ""],
+          correctIndex: 0,
+        });
+      });
   }
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>New Question</h2>
-      <div>
-        <label>
-          Prompt:
+      {/* ✅ heading changed to avoid duplicate "New Question" text */}
+      <h2>Add a New Question</h2>
+
+      <label>
+        Prompt:
+        <input
+          type="text"
+          name="prompt"
+          value={formData.prompt}
+          onChange={handleChange}
+        />
+      </label>
+
+      {formData.answers.map((answer, index) => (
+        <label key={index}>
+          Answer {index + 1}:
           <input
             type="text"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            required
+            value={answer}
+            onChange={(e) => handleAnswerChange(index, e.target.value)}
           />
         </label>
-      </div>
-      <div>
-        {answers.map((ans, idx) => (
-          <label key={idx}>
-            Answer {idx + 1}:
-            <input
-              type="text"
-              value={ans}
-              onChange={(e) => handleAnswerChange(idx, e.target.value)}
-              required
-            />
-          </label>
-        ))}
-      </div>
+      ))}
+
       <label>
-        Correct Index:
+        Correct Answer:
         <select
-          value={correctIndex}
-          onChange={(e) => setCorrectIndex(e.target.value)}
+          name="correctIndex"
+          value={formData.correctIndex}
+          onChange={handleChange}
         >
-          {answers.map((_, idx) => (
-            <option key={idx} value={idx}>
-              {idx}
+          {formData.answers.map((_, i) => (
+            <option key={i} value={i}>
+              {i + 1}
             </option>
           ))}
         </select>
       </label>
+
       <button type="submit">Add Question</button>
     </form>
   );
